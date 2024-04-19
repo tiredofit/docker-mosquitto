@@ -1,0 +1,17 @@
+#!/command/with-contenv bash
+
+source /assets/functions/00-container
+prepare_service defaults single
+PROCESS_NAME="mosquitto"
+
+check_container_initialized
+check_service_initialized init
+
+if [ -n "${ADMIN_USER}" ] && [ -n "${ADMIN_PASS}" ]; then
+    _mosquitto_admin_credentials="--username ${ADMIN_USER} --password ${ADMIN_PASS}"
+fi
+liftoff
+
+print_start "Starting mosquitto ${mosquitto_VERSION}"
+exec mosquitto \
+                -c "${CONFIG_PATH}"/"${CONFIG_FILE}"
