@@ -13,6 +13,8 @@ ENV MOSQUITTO_VERSION=${MOSQUITTO_VERSION:-"v2.0.18"} \
 
 RUN source /assets/functions/00-container && \
     set -x && \
+    addgroup -g 1883 mosquitto && \
+    adduser -S -D -G mosquitto -u 1883 -h /var/lib/mosquitto/ mosquitto && \
     package update && \
     package upgrade && \
     package install .mosquitto-build-deps \

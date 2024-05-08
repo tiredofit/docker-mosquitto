@@ -2,19 +2,113 @@ bootstrap_filesystem() {
     if [ ! -d "${CONFIG_PATH}" ]; then
         mkdir -p "${CONFIG_PATH}"
     fi
-    if [ "$(stat -c %U "${CONFIG_PATH}")" != "root" ] ; then chown -R root:root "${CONFIG_PATH}" ; fi
+    if [ "$(stat -c %U "${CONFIG_PATH}")" != "mosquitto" ] ; then chown -R "${MOSQUITTO_USER}":"${MOSQUITTO_GROUP}" "${CONFIG_PATH}" ; fi
 
     if [ ! -d "${DATA_PATH}" ]; then
         mkdir -p "${DATA_PATH}"
     fi
-    if [ "$(stat -c %U "${DATA_PATH}")" != "root" ] ; then chown root:root "${DATA_PATH}" ; fi
+
+    if [ "$(stat -c %U "${DATA_PATH}")" != "mosquitto" ] ; then chown -R "${MOSQUITTO_USER}":"${MOSQUITTO_GROUP}" "${DATA_PATH}" ; fi
+
+    if [ ! -d "${PERSISTENCE_PATH}" ]; then
+        mkdir -p "${PERSISTENCE_PATH}"
+    fi
+
+    if [ "$(stat -c %U "${PERSISTENCE_PATH}")" != "mosquitto" ] ; then chown -R "${MOSQUITTO_USER}":"${MOSQUITTO_GROUP}" "${PERSISTENCE_PATH}" ; fi
+
+    if [ ! -f "${SECURITY_PASSWORD_PATH}"/"${SECURITY_PASSWORD_FILE}" ]; then
+        sudo -u "${MOSQUITTO_USER}" mkdir -p "${SECURITY_PASSWORD_PATH}"
+        sudo -u "${MOSQUITTO_USER}" touch "${SECURITY_PASSWORD_PATH}"/"${SECURITY_PASSWORD_FILE}"
+    fi
+
+    chmod 0700 "${SECURITY_PASSWORD_PATH}"/"${SECURITY_PASSWORD_FILE}"
+
+    if [ "$(stat -c %U "${SECURITY_PASSWORD_PATH}"/"${SECURITY_PASSWORD_FILE}")" != "mosquitto" ] ; then chown -R "${MOSQUITTO_USER}":"${MOSQUITTO_GROUP}" "${SECURITY_PASSWORD_PATH}" ; fi
 
     if [ ! -d "${LOG_PATH}" ]; then
         mkdir -p "${LOG_PATH}"
     fi
-    if [ "$(stat -c %U "${LOG_PATH}")" != "root" ] ; then chown -R root:root "${LOG_PATH}" ; fi
+    if [ "$(stat -c %U "${LOG_PATH}")" != "mosquitto" ] ; then chown -R "${MOSQUITTO_USER}":"${MOSQUITTO_GROUP}" "${LOG_PATH}" ; fi
 }
 
 generate_config() {
     touch "${CONFIG_PATH}"/"${CONFIG_FILE}"
+    if [ "${SETUP_TYPE,,}" = "auto" ]; then
+        case "${LOG_TYPE,,}" in
+            both )
+                log_type=$(cat <<EOF
+log_dest stdout
+log dest file ${LOG_PATH}/${LOG_FILE}
+EOF
+                         )
+            ;;
+            console )
+                log_type=$(cat <<EOF
+log_dest stdout
+EOF
+                         )
+            ;;
+            file )
+                log_type=$(cat <<EOF
+log dest file ${LOG_PATH}/${LOG_FILE}
+EOF
+                         )
+            ;;
+            both )
+                log_type=$(cat <<EOF
+log dest file /dev/null
+EOF
+                         )
+            ;;
+        esac
+
+        cat <<EOF > "${CONFIG_PATH}"/"${CONFIG_FILE}"
+# Custom Generated Mosquitto Configuration - Do not edit, instead set ENV Vars
+# If you do want to edit this file and add your own custom, set the environment variable 'SETUP_TYPE=MANUAL' for next restart of container.
+# Last Generated on $(TZ=${TIMEZONE} date +'%Y-%m-%d %H:%M:%S %Z')
+
+user ${MOSQUITTO_USER}
+
+# Listeners
+listener ${LISTEN_PORT} ${LISTEN_IP}
+socket_domain ipv4
+max_connections ${LISTENER_MAX_CONNECTIONS}
+protocol ${LISTENER_PROTOCOL,,}
+
+# Logging
+${log_type}
+$(for level in $(echo "${LOG_LEVEL}" | tr ',' '\n' | uniq) ; do echo "log_type ${level}" ; done)
+connection_messages ${LOG_CONNECTION_MESSAGES,,}
+log_timestamp ${LOG_ENABLE_TIMESTAMP,,}
+log_timestamp_format ${LOG_TIMESTAMP_FORMAT}
+
+#
+persistence ${ENABLE_PERSISTENCE,,}
+autosave_interval ${PERSISTENCE_AUTOSAVE_INTERVAL}
+autosave_on_changes ${PERSISTENCE_AUTOSAVE_ON_CHANGES,,}
+persistence_file ${PERSISTENCE_FILE}
+persistence_location ${DATA_PATH}
+#
+
+# Security
+allow_anonymous ${SECURITY_ENABLE_ANONYMOUS,,}
+password_file ${DATA_PATH}/auth/${SECURITY_PASSWORD_FILE}
+EOF
+    else
+        print_info "Skipping configuration routines due to SETUP_TYPE=manual"
+    fi
+}
+
+generate_authentication() {
+    crednum=$(printenv | sort | grep -c '^CREDENTIAL.*_USER')
+    for (( num = 01; num <= crednum; num++ )) ; do
+        num=$(printf "%02d" $num)
+        transform_file_var \
+                            CREDENTIAL${num}_USER \
+                            CREDENTIAL${num}_PASS
+        _credential_user=CREDENTIAL${num}_USER
+        _credential_pass=CREDENTIAL${num}_PASS
+
+        silent sudo -u "${MOSQUITTO_USER}" mosquitto_passwd -b "${SECURITY_PASSWORD_PATH}"/"${SECURITY_PASSWORD_FILE}" "${!_credential_user}" "${!_credential_pass}"
+    done
 }

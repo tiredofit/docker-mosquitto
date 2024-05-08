@@ -1,0 +1,33 @@
+services:
+
+  mosquitto-app:
+    image: tiredofit/mosquitto:latest
+    container_name: mosquitto-app
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.nginx-app.rule=Host(`nginx.example.com`)
+      - traefik.http.services.nginx-app.loadbalancer.server.port=80
+    volumes:
+      #- ./config:/config
+      #- ./data:/data
+      - ./logs:/logs
+    environment:
+      - TIMEZONE=America/Vancouver
+      - CONTAINER_NAME=mosquitto-app
+
+      - LISTEN_PORT=1833
+
+      - LOG_LEVEL=all
+      - LOG_TYPE=console
+
+      - CREDENTIAL01_USER=mosquitto
+      - CREDENTIAL01_PASS=secure
+
+      - ENABLE_PERSISTENCE=FALSE
+    networks:
+      - services
+    restart: always
+
+networks:
+  services:
+    external: true
