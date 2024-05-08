@@ -108,7 +108,7 @@ generate_authentication() {
                             CREDENTIAL${num}_PASS
         _credential_user=CREDENTIAL${num}_USER
         _credential_pass=CREDENTIAL${num}_PASS
-
+        print_debug "Setting up credentials for user '${!_credential_user}'"
         silent sudo -u "${MOSQUITTO_USER}" mosquitto_passwd -b "${SECURITY_PASSWORD_PATH}"/"${SECURITY_PASSWORD_FILE}" "${!_credential_user}" "${!_credential_pass}"
     done
 }
