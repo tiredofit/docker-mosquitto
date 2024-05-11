@@ -38,7 +38,7 @@ generate_config() {
             both )
                 log_type=$(cat <<EOF
 log_dest stdout
-log dest file ${LOG_PATH}/${LOG_FILE}
+log_dest file ${LOG_PATH}/${LOG_FILE}
 EOF
                          )
             ;;
@@ -50,13 +50,13 @@ EOF
             ;;
             file )
                 log_type=$(cat <<EOF
-log dest file ${LOG_PATH}/${LOG_FILE}
+log_dest file ${LOG_PATH}/${LOG_FILE}
 EOF
                          )
             ;;
             both )
                 log_type=$(cat <<EOF
-log dest file /dev/null
+log_dest file /dev/null
 EOF
                          )
             ;;
