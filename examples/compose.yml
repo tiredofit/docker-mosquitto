@@ -3,13 +3,9 @@ services:
   mosquitto-app:
     image: tiredofit/mosquitto:latest
     container_name: mosquitto-app
-    labels:
-      - traefik.enable=true
-      - traefik.http.routers.nginx-app.rule=Host(`nginx.example.com`)
-      - traefik.http.services.nginx-app.loadbalancer.server.port=80
     volumes:
       #- ./config:/config
-      #- ./data:/data
+      - ./data:/data
       - ./logs:/logs
     environment:
       - TIMEZONE=America/Vancouver
