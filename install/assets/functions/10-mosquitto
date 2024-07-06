@@ -29,6 +29,11 @@ bootstrap_filesystem() {
         mkdir -p "${LOG_PATH}"
     fi
     if [ "$(stat -c %U "${LOG_PATH}")" != "mosquitto" ] ; then chown -R "${MOSQUITTO_USER}":"${MOSQUITTO_GROUP}" "${LOG_PATH}" ; fi
+    case "${LOG_TYPE,,}" in
+        both | file )
+            create_logrotate mosquitto "${LOG_PATH}"/"${LOG_FILE}" none "${MOSQUITTO_USER}" "${MOSQUITTO_GROUP}"
+        ;;
+    esac
 }
 
 generate_config() {
