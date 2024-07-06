@@ -12,6 +12,6 @@ if [ -n "${ADMIN_USER}" ] && [ -n "${ADMIN_PASS}" ]; then
 fi
 liftoff
 
-print_start "Starting mosquitto ${mosquitto_VERSION}"
+print_start "Starting mosquitto ${MOSQUITTO_VERSION}"
 exec mosquitto \
                 -c "${CONFIG_PATH}"/"${CONFIG_FILE}"

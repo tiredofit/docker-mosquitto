@@ -32,7 +32,7 @@ RUN source /assets/functions/00-container && \
                     openssl \
                     libwebsockets \
                     && \
-
+    \
     clone_git_repo "${MOSQUITTO_REPO_URL}" "${MOSQUITTO_VERSION}" /usr/src/mosquitto && \
     cd /usr/src/mosquitto && \
     make \
