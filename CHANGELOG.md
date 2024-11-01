@@ -1,3 +1,9 @@
+## 0.3.1 2024-11-01 <dave at tiredofit dot ca>
+
+   ### Added
+      - Mosquitto 2.0.20
+
+
 ## 0.3.0 2024-07-06 <dave at tiredofit dot ca>
 
    ### Added
