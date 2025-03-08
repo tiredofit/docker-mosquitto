@@ -1,3 +1,10 @@
+## 0.3.3 2025-03-08 <dave at tiredofit dot ca>
+
+   ### Added
+      - Mosquitto 2.0.21
+      - Pin to tiredofit/alpine:7.10.29
+
+
 ## 0.3.2 2024-12-07 <dave at tiredofit dot ca>
 
    ### Added

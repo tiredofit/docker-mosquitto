@@ -1,12 +1,12 @@
 ARG DISTRO=alpine
-ARG DISTRO_VARIANT=3.21-7.10.24
+ARG DISTRO_VARIANT=3.21-7.10.29
 
 FROM docker.io/tiredofit/${DISTRO}:${DISTRO_VARIANT}
 LABEL maintainer="Dave Conroy (github.com/tiredofit)"
 
 ARG MOSQUITTO_VERSION
 
-ENV MOSQUITTO_VERSION=${MOSQUITTO_VERSION:-"v2.0.20"} \
+ENV MOSQUITTO_VERSION=${MOSQUITTO_VERSION:-"v2.0.21"} \
     MOSQUITTO_REPO_URL=https://github.com/eclipse/mosquitto \
     IMAGE_NAME="tiredofit/mosquitto" \
     IMAGE_REPO_URL="https://github.com/tiredofit/docker-mosquitto"
