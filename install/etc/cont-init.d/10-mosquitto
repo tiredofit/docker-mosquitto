@@ -5,6 +5,32 @@ source /assets/functions/00-container
 prepare_service
 PROCESS_NAME="mosquitto"
 
+cat <<EOF
+
+*******************************************************************************************
+*                                                                                         *
+*                    END OF LIFE NOTICE AUGUST 18, 2025                                   *
+*                               tiredofit/mosquitto                                       *
+*                                                                                         *
+* This image is no longer maintained as of and will not receive updates.                  *
+*                                                                                         *
+* A successor image is available at:                                                      *
+*                                                                                         *
+* Repository | Documentation:                                                             *
+*   - https://github.com/nfrastack/container-mosquitto                                    *
+*                                                                                         *
+* Image Registries:                                                                       *
+*   - https://hub.docker.com/r/nfrastack/mosquitto                                        *
+*   - https://github.com/nfrastack/container-mosquitto/pkgs/container/container-mosquitto *
+*                                                                                         *
+* Please visit https://nfrastack.com for more information.                                *
+*                                                                                         *
+*******************************************************************************************
+
+EOF
+
+sleep 15
+
 bootstrap_filesystem
 generate_authentication
 generate_config

@@ -1,3 +1,10 @@
+## 0.3.99 2025-09-04 <dave at tiredofit dot ca>
+
+Add EOL notice
+
+   ### Added
+
+
 ## 0.3.3 2025-03-08 <dave at tiredofit dot ca>
 
    ### Added
