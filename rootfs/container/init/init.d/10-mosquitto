@@ -1,0 +1,15 @@
+#!/command/with-contenv bash
+# SPDX-FileCopyrightText: © 2025 Nfrastack <code@nfrastack.com>
+#
+# SPDX-License-Identifier: MIT
+
+source /container/base/functions/container/init
+
+prepare_service 10-mosquitto
+SERVICE_NAME="mosquitto"
+
+mosquitto_bootstrap_filesystem
+mosquitto_generate_authentication
+mosquitto_generate_config
+
+liftoff

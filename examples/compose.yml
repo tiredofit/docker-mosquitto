@@ -1,7 +1,7 @@
 services:
 
   mosquitto-app:
-    image: tiredofit/mosquitto:latest
+    image: nfrastack/mosquitto:latest
     container_name: mosquitto-app
     volumes:
       #- ./config:/config
@@ -9,7 +9,6 @@ services:
       - ./logs:/logs
     environment:
       - TIMEZONE=America/Vancouver
-      - CONTAINER_NAME=mosquitto-app
 
       - LISTEN_PORT=1833
 

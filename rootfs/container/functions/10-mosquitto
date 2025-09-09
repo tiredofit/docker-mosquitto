@@ -1,20 +1,21 @@
-bootstrap_filesystem() {
-    if [ ! -d "${CONFIG_PATH}" ]; then
-        mkdir -p "${CONFIG_PATH}"
-    fi
-    if [ "$(stat -c %U "${CONFIG_PATH}")" != "mosquitto" ] ; then chown -R "${MOSQUITTO_USER}":"${MOSQUITTO_GROUP}" "${CONFIG_PATH}" ; fi
+# SPDX-FileCopyrightText: © 2025 Nfrastack <code@nfrastack.com>
+#
+# SPDX-License-Identifier: MIT
 
-    if [ ! -d "${DATA_PATH}" ]; then
-        mkdir -p "${DATA_PATH}"
-    fi
+mosquitto_bootstrap_filesystem() {
+    create_folder \
+                "${CONFIG_PATH},\
+                ${DATA_PATH},\
+                ${LOG_PATH},\
+                ${PERSISTENCE_PATH}" \
+                "${MOSQUITTO_USER}":"${MOSQUITTO_GROUP}" \
+                755
 
-    if [ "$(stat -c %U "${DATA_PATH}")" != "mosquitto" ] ; then chown -R "${MOSQUITTO_USER}":"${MOSQUITTO_GROUP}" "${DATA_PATH}" ; fi
-
-    if [ ! -d "${PERSISTENCE_PATH}" ]; then
-        mkdir -p "${PERSISTENCE_PATH}"
-    fi
-
-    if [ "$(stat -c %U "${PERSISTENCE_PATH}")" != "mosquitto" ] ; then chown -R "${MOSQUITTO_USER}":"${MOSQUITTO_GROUP}" "${PERSISTENCE_PATH}" ; fi
+    case "${LOG_TYPE,,}" in
+        both | file )
+            create_logrotate mosquitto "${LOG_PATH}"/"${LOG_FILE}" none "${MOSQUITTO_USER}" "${MOSQUITTO_GROUP}"
+        ;;
+    esac
 
     if [ ! -f "${SECURITY_PASSWORD_PATH}"/"${SECURITY_PASSWORD_FILE}" ]; then
         sudo -u "${MOSQUITTO_USER}" mkdir -p "${SECURITY_PASSWORD_PATH}"
@@ -23,22 +24,12 @@ bootstrap_filesystem() {
 
     chmod 0700 "${SECURITY_PASSWORD_PATH}"/"${SECURITY_PASSWORD_FILE}"
 
-    if [ "$(stat -c %U "${SECURITY_PASSWORD_PATH}"/"${SECURITY_PASSWORD_FILE}")" != "mosquitto" ] ; then chown -R "${MOSQUITTO_USER}":"${MOSQUITTO_GROUP}" "${SECURITY_PASSWORD_PATH}" ; fi
-
-    if [ ! -d "${LOG_PATH}" ]; then
-        mkdir -p "${LOG_PATH}"
-    fi
-    if [ "$(stat -c %U "${LOG_PATH}")" != "mosquitto" ] ; then chown -R "${MOSQUITTO_USER}":"${MOSQUITTO_GROUP}" "${LOG_PATH}" ; fi
-    case "${LOG_TYPE,,}" in
-        both | file )
-            create_logrotate mosquitto "${LOG_PATH}"/"${LOG_FILE}" none "${MOSQUITTO_USER}" "${MOSQUITTO_GROUP}"
-        ;;
-    esac
+    if [ "$(stat -c %U "${SECURITY_PASSWORD_PATH}"/"${SECURITY_PASSWORD_FILE}")" != "${MOSQUITTO_USER}" ] ; then chown -R "${MOSQUITTO_USER}":"${MOSQUITTO_GROUP}" "${SECURITY_PASSWORD_PATH}" ; fi
 }
 
-generate_config() {
+mosquitto_generate_config() {
     touch "${CONFIG_PATH}"/"${CONFIG_FILE}"
-    if [ "${SETUP_TYPE,,}" = "auto" ]; then
+    if [ "${MOSQUITTO_SETUP_TYPE,,}" = "auto" ]; then
         case "${LOG_TYPE,,}" in
             both )
                 log_type=$(cat <<EOF
@@ -59,7 +50,7 @@ log_dest file ${LOG_PATH}/${LOG_FILE}
 EOF
                          )
             ;;
-            both )
+            none )
                 log_type=$(cat <<EOF
 log_dest file /dev/null
 EOF
@@ -104,11 +95,11 @@ EOF
     fi
 }
 
-generate_authentication() {
+mosquitto_generate_authentication() {
     crednum=$(printenv | sort | grep -c '^CREDENTIAL.*_USER')
     for (( num = 01; num <= crednum; num++ )) ; do
         num=$(printf "%02d" $num)
-        transform_file_var \
+        transform_var file \
                             CREDENTIAL${num}_USER \
                             CREDENTIAL${num}_PASS
         _credential_user=CREDENTIAL${num}_USER

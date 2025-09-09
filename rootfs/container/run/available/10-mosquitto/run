@@ -1,8 +1,11 @@
 #!/command/with-contenv bash
+# SPDX-FileCopyrightText: © 2025 Nfrastack <code@nfrastack.com>
+#
+# SPDX-License-Identifier: MIT
 
-source /assets/functions/00-container
-prepare_service defaults single
-PROCESS_NAME="mosquitto"
+source /container/base/functions/container/init
+prepare_service 10-mosquitto
+SERVICE_NAME="mosquitto"
 
 check_container_initialized
 check_service_initialized init
@@ -12,6 +15,6 @@ if [ -n "${ADMIN_USER}" ] && [ -n "${ADMIN_PASS}" ]; then
 fi
 liftoff
 
-print_start "Starting mosquitto ${MOSQUITTO_VERSION}"
+print_start "Starting mosquitto $(mosquitto -h | head -n1 | awk '{print $3}')"
 exec mosquitto \
                 -c "${CONFIG_PATH}"/"${CONFIG_FILE}"

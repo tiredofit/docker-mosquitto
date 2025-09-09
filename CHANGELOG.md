@@ -1,8 +1,14 @@
+## 0.4.0 2025-09-09 <code at nfrastack dot com>
+
+   ### Added
+      - New base nfrastack/container-base
+      - Alpine 3.22
+      - Mosquitto 2.0.22
+
+
 ## 0.3.99 2025-09-04 <dave at tiredofit dot ca>
 
 Add EOL notice
-
-   ### Added
 
 
 ## 0.3.3 2025-03-08 <dave at tiredofit dot ca>
